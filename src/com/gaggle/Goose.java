@@ -23,7 +23,7 @@ import com.gaggle.Platform.PlatformType;
 
 public class Goose extends PhysicsObject {
 
-	public static float MAX_DENSITY = 60, MAX_SPEED = 15, MAX_ACCEL = 3, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 10;
+	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 3, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 10;
 
 	protected Circle circleA, circleB;
 	protected Rectangle rect, rectBase;
@@ -35,7 +35,7 @@ public class Goose extends PhysicsObject {
 	protected CreatureRenderer renderer;
 
 	protected int dir = 1;
-	protected float targetSpeed = 6;
+	protected float targetSpeed;
 
 	protected boolean isGrounded, isPlatformInFront, isLedgeInFront, isTouchingGoose, isUpsideDown, isGooseUnder;
 	protected Vec2 gooseUnderVelocity = new Vec2();
@@ -45,6 +45,7 @@ public class Goose extends PhysicsObject {
 		this.world = world;
 		this.chromosome = chromosome;
 		this.renderer = new CreatureRenderer(chromosome);
+		this.targetSpeed = chromosome.maxSpeed * 0.75f * MAX_SPEED;
 
 		float radius = MAX_SCALE * chromosome.scale;
 		circleA = new Circle(-radius / 2, 0, radius);
@@ -58,13 +59,14 @@ public class Goose extends PhysicsObject {
 				radius * 1.5f, 0, radius * 3f, 0,  radius * 1.5f, radius
 		});
 		plowB = new Polygon(new float[] {
-				-radius * 1.5f, 0, -radius * 3f, radius, -radius * 1.5f, radius
+				-radius * 1.5f, -radius * 0.4f, -radius * 3f, radius, -radius * 1.5f, radius
 		});
 
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(Constant.pixelsToMeters(position));
 		body = world.createBody(bodyDef);
 		body.setType(BodyType.DYNAMIC);
+		body.setAngularDamping(0.01f);
 
 		addFixture(createShape(circleA));
 		addFixture(createShape(circleB));
@@ -115,9 +117,7 @@ public class Goose extends PhysicsObject {
 			Vec2 v = body.getLinearVelocity().clone();
 			Vec2 targetVelocity = new Vec2((float) Math.cos(body.getAngle()) * targetSpeed, 
 					(float) Math.sin(body.getAngle()) * targetSpeed);
-			if (isGooseUnder) {
-//				targetVelocity.addLocal(gooseUnderVelocity);
-			}
+			
 			targetVelocity.y = Math.max(targetVelocity.y, v.y);
 			v.x = Util.lerp(v.x, targetVelocity.x * dir, 0.005f);
 			v.y = Util.lerp(v.y, -targetVelocity.y, 0.005f);
@@ -219,24 +219,25 @@ public class Goose extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.scale(dir, 1);
 
-		float alpha = 0.5f;
+		float alpha = isGooseUnder ? 1 : 0.1f;
 		
-//		g.setColor(new Color(1, 0, 0, alpha));
-//		g.fill(circleA);
-//		g.fill(circleB);
-//		g.fill(rect);
-//
-//		g.setColor(new Color(0, 1, 1, alpha));
-//		g.fill(c);
-//		g.fill(rectBase);
-//
-//		g.pushTransform();
-//		g.scale(dir, 1);
-//		g.setColor(new Color(1, 1, 1, alpha));
-//		g.fill(plowA);
-//		g.fill(plowB);
-//		g.popTransform();
+		g.setColor(new Color(1, 0, 0, alpha));
+		g.fill(circleA);
+		g.fill(circleB);
+		g.fill(rect);
 
+		g.setColor(new Color(0, 1, 1, alpha));
+		g.fill(c);
+		g.fill(rectBase);
+
+		g.pushTransform();
+		g.scale(dir, 1);
+		g.setColor(new Color(1, 1, 1, alpha));
+		g.fill(plowA);
+		g.fill(plowB);
+		g.popTransform();
+
+		
 		renderer.render(g);
 
 	}
