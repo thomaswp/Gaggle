@@ -21,6 +21,9 @@ import com.gaggle.Platform.PlatformType;
 
 public class GameWorld implements GameObject, MouseListener, ContactListener {
 
+	private final static int SPAWN_TIME = 5000;
+	private static final int MAX_POOL = 10;
+	
 	private World world;
 	private List<GameObject> gameObjects = new ArrayList<>();
 	private Vector2f origin = new Vector2f();
@@ -28,8 +31,13 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	private Vector2f worldDimensions = new Vector2f(2800, 1200);
 	private float minScale;
 	private Vector2f resolution;
+	private List<Goose> geese = new ArrayList<>();
+	private List<Chromosome> chromosomes = new ArrayList<>();
 	
-	Background background;
+	private Background background;
+	
+	private int untilSpawn = SPAWN_TIME;
+	
 	
 	public GameWorld(GameContainer container) {
 		world = new World(new Vec2(0, 10));
@@ -44,14 +52,17 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		background = new Background();
 		
 		float w = worldDimensions.x, h = worldDimensions.y;
-		float dw = w / 2, dh = h / 2;
+		float dw = w / 2;
 		float border = 50;
 		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, w, border), PlatformType.Ceiling));
 		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, border, h), PlatformType.Wall));
 		gameObjects.add(new Platform(world, new Rectangle(dw, -h, border, h + border), PlatformType.Wall));
 		gameObjects.add(new Platform(world, new Rectangle(-dw, 0, w + border, border), PlatformType.Floor));
 		for (int i = 0; i < 5; i++) {
-			gameObjects.add(new Goose(world, new Vector2f(-300 + i * 200, -100), new Chromosome()));
+			Goose goose = new Goose(world, new Vector2f(-300 + i * 200, -100), new Chromosome());
+			geese.add(goose);
+			chromosomes.add(goose.chromosome);
+			gameObjects.add(goose);
 		}
 		
 		container.getInput().addMouseListener(this);
@@ -65,6 +76,25 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		}
 		scale = Util.lerp(scale, targetScale, 0.1f);
 		background.update(container, delta);
+		
+		untilSpawn -= delta;
+		if (untilSpawn <= 0) {
+			untilSpawn += SPAWN_TIME;
+			
+			Goose goose = geese.remove(0);
+			if (goose.isSelected()) {
+				chromosomes.add(goose.chromosome);
+				if (chromosomes.size() > MAX_POOL) {
+					chromosomes.remove(0);
+				}
+			}
+			gameObjects.remove(goose);
+			Chromosome c = chromosomes.get((int)(chromosomes.size() * Math.random())).clone();
+//			c.mutate();
+			Goose newGoose = new Goose(world, new Vector2f(-300 + (int)(Math.random() * 5) * 200, -100), c);
+			gameObjects.add(newGoose);
+			geese.add(newGoose);
+		}
 	}
 
 	@Override
@@ -85,7 +115,18 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	private void updateBounds() {
 		origin.x = Math.min(Math.max(origin.x, -worldDimensions.x / 2), worldDimensions.x / 2);
 		origin.y = Math.min(Math.max(origin.y, -worldDimensions.y), -worldDimensions.y / 6 / scale);
-		Debug.log(origin);
+	}
+	
+	private Vector2f mouseToWorldCoordinates(float x, float y) {
+		x -= resolution.x / 2;
+		y -= resolution.y / 2;
+		x /= scale;
+		y /= scale;
+		x += origin.x;
+		y += origin.y;
+		
+		return new Vector2f(x, y);
+		
 	}
 	
 	@Override
@@ -104,7 +145,6 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	@Override
 	public void mouseClicked(int button, int x, int y, int clickCount) {
-		
 	}
 
 	@Override
@@ -121,7 +161,12 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	@Override
 	public void mousePressed(int button, int x, int y) {
-
+		Vector2f coords = mouseToWorldCoordinates(x, y);
+		for (Goose goose : geese) {
+			if (goose.isClicked(coords)) {
+				goose.toggleSelected();
+			}
+		}
 	}
 
 	@Override

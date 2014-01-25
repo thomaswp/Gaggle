@@ -57,7 +57,7 @@ public class Background {
 		
 		for (Cloud cloud : clouds) {g.pushTransform();
 			g.translate(container.getWidth() / 2, container.getHeight() / 2);
-			float s = 1 / (1 / scale + 7) * 7;
+			float s = 1 / (1 / scale + 5) * 5;
 			float t = 0.1f / cloud.speed;
 			g.scale(s, s);
 			g.translate(-origin.x * t, -origin.y * t);
@@ -68,7 +68,7 @@ public class Background {
 		
 		g.pushTransform();
 		g.translate(container.getWidth() / 2, container.getHeight() / 2);
-		float s = 1 / (1 / scale + 5) * 5;
+		float s = 1 / (1 / scale + 3) * 3;
 		float t = 0.1f;
 		g.scale(s, s);
 		g.translate(-origin.x * t, -origin.y * t);

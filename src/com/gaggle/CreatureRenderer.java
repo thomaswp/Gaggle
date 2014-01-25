@@ -2,6 +2,8 @@ package com.gaggle;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.ShapeFill;
+import org.newdawn.slick.font.effects.OutlineEffect;
 import org.newdawn.slick.geom.Ellipse;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Rectangle;
@@ -83,35 +85,46 @@ public class CreatureRenderer {
 		ticks = 0;
 	}
 	
-	public void render(Graphics g) {
+	public void render(Graphics g, boolean selected) {
 		double sze = size.getX()/40.0;
 		double spd = speed*8;
 		
+		int passes = selected ? 2 : 1;
 		g.translate(0, -size.getY() * 0.2f);
-		g.pushTransform();
-			g.setLineWidth(2);
-			g.scale(direction, 1);
-			drawOutlinedShape(g, bodyShape, bodyColor);
+		for (int i = 0; i < passes; i++) {
+			boolean outline = selected && i == 0;
 			g.pushTransform();
-				g.translate((float) (Math.cos(Math.toRadians(ticks/(4*sze)))*sze*spd), (float) (sze*spd*(-(Math.sin(Math.toRadians(-ticks/(4*sze)))*5+5)))); 
-				drawOutlinedShape(g, headShape, headColor);
+				g.scale(direction, 1);
+				drawOutlinedShape(g, bodyShape, bodyColor, outline);
+				g.pushTransform();
+					g.translate((float) (Math.cos(Math.toRadians(ticks/(4*sze)))*sze*spd), (float) (sze*spd*(-(Math.sin(Math.toRadians(-ticks/(4*sze)))*5+5)))); 
+					drawOutlinedShape(g, headShape, headColor, outline);
+				g.popTransform();
+				g.pushTransform();
+					g.translate((float) (Math.sin(Math.toRadians(-ticks/(2*sze)))*10*sze*spd)*direction, (float) (Math.cos(Math.toRadians(-ticks/(2*sze)))*2*sze*spd)*direction); 
+					drawOutlinedShape(g, leftFootShape, footColor, outline);
+				g.popTransform();
+				g.pushTransform();
+					g.translate((float) (Math.cos(Math.toRadians(ticks/(2*sze)))*10*sze*spd)*direction, (float) (Math.sin(Math.toRadians(ticks/(2*sze)))*2*sze*spd)*direction); 
+					drawOutlinedShape(g, rightFootShape, footColor, outline);
+				g.popTransform();
 			g.popTransform();
-			g.pushTransform();
-				g.translate((float) (Math.sin(Math.toRadians(-ticks/(2*sze)))*10*sze*spd)*direction, (float) (Math.cos(Math.toRadians(-ticks/(2*sze)))*2*sze*spd)*direction); 
-				drawOutlinedShape(g, leftFootShape, footColor);
-			g.popTransform();
-			g.pushTransform();
-				g.translate((float) (Math.cos(Math.toRadians(ticks/(2*sze)))*10*sze*spd)*direction, (float) (Math.sin(Math.toRadians(ticks/(2*sze)))*2*sze*spd)*direction); 
-				drawOutlinedShape(g, rightFootShape, footColor);
-			g.popTransform();
-		g.popTransform();
+		}
 	}
 	
 	public void update(int delta, double spd) {
 		ticks = (ticks + delta);
 	}
 	
-	private static void drawOutlinedShape(Graphics g, Shape s, Color c) {
+	private static void drawOutlinedShape(Graphics g, Shape s, Color c, boolean outline) {
+		if (outline) {
+			g.setLineWidth(10);
+			g.setColor(new Color(255, 255, 200, 175));
+			g.draw(s);
+			return;
+		}
+
+		g.setLineWidth(2);
 		g.setColor(c);
 		g.fill(s);
 		g.setColor(Color.black);

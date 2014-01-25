@@ -5,18 +5,18 @@ import java.util.List;
 
 import org.jbox2d.callbacks.QueryCallback;
 import org.jbox2d.collision.AABB;
-import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 
 import com.gaggle.Platform.PlatformType;
@@ -39,8 +39,17 @@ public class Goose extends PhysicsObject {
 
 	protected boolean isGrounded, isPlatformInFront, isLedgeInFront, isTouchingGoose, isUpsideDown, isGooseUnder;
 	protected Vec2 gooseUnderVelocity = new Vec2();
-	protected boolean isMoving = true;
+	protected boolean isMoving = true, selected;
 
+
+	public boolean isSelected() {
+		return selected;
+	}
+	
+	public void toggleSelected() {
+		selected = !selected;
+	}
+	
 	public Goose(World world, Vector2f position, Chromosome chromosome) {
 		this.world = world;
 		this.chromosome = chromosome;
@@ -91,7 +100,7 @@ public class Goose extends PhysicsObject {
 		c.setCenterX(radius);
 	}
 
-	protected Fixture addFixture(Shape shape) {
+	protected Fixture addFixture(org.jbox2d.collision.shapes.Shape shape) {
 		Fixture f = body.createFixture(shape, chromosome.density * MAX_DENSITY);
 		f.setFriction(0);
 		f.setRestitution(chromosome.restitution * MAX_RESTITUTION);
@@ -240,9 +249,29 @@ public class Goose extends PhysicsObject {
 //		g.fill(plowB);
 //		g.popTransform();
 
-		
-		renderer.render(g);
+		renderer.render(g, selected);
 
+	}
+
+	public boolean isClicked(Vector2f coords) {
+		Shape[] shapes = new Shape[] {
+			renderer.bodyShape,
+			renderer.headShape,
+			renderer.leftFootShape,
+			renderer.rightFootShape
+		};
+		
+		Transform xform = new Transform();
+		xform.concatenate(Transform.createTranslateTransform(Constant.metersToPixels(body.getPosition().x), 
+				Constant.metersToPixels(body.getPosition().y)));
+		xform.concatenate(Transform.createRotateTransform(Constant.radiansToDegrees(body.getAngle())));
+		
+		for (Shape shape : shapes) {
+			if (shape.transform(xform).contains(coords.x, coords.y)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
