@@ -35,11 +35,12 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		float w = worldDimensions.x, h = worldDimensions.y;
 		float dw = w / 2, dh = h / 2;
 		float border = 50;
-		gameObjects.add(new Platform(world, new Rectangle(-dw, -dh, w, border), PlatformType.Ceiling));
-		gameObjects.add(new Platform(world, new Rectangle(-dw, -dh, border, h), PlatformType.Wall));
-		gameObjects.add(new Platform(world, new Rectangle(dw, -dh, border, h + border), PlatformType.Wall));
-		gameObjects.add(new Platform(world, new Rectangle(-dw, dh, w + border, border), PlatformType.Floor));
-		gameObjects.add(new Goose(world, new Vector2f(0, -200), new Chromosome()));
+		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, w, border), PlatformType.Ceiling));
+		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, border, h), PlatformType.Wall));
+		gameObjects.add(new Platform(world, new Rectangle(dw, -h, border, h + border), PlatformType.Wall));
+		gameObjects.add(new Platform(world, new Rectangle(-dw, 0, w + border, border), PlatformType.Floor));
+		gameObjects.add(new Goose(world, new Vector2f(0, -100), new Chromosome()));
+		gameObjects.add(new Goose(world, new Vector2f(-200, -100), new Chromosome()));
 		
 		container.getInput().addMouseListener(this);
 	}

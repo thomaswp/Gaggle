@@ -1,8 +1,15 @@
 package com.gaggle;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.geom.Circle;
+import org.newdawn.slick.geom.Polygon;
+import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Vector2f;
 
 public abstract class PhysicsObject implements GameObject {
 	protected Body body;
@@ -25,4 +32,31 @@ public abstract class PhysicsObject implements GameObject {
 		g.popTransform();
 	}
 	
+	protected PolygonShape createShape(Polygon poly) {
+		PolygonShape shape = new PolygonShape();
+		Vec2[] points = new Vec2[poly.getPointCount()];
+		for (int i = 0; i < points.length; i++) {
+			float[] p = poly.getPoint(i);
+			Vec2 point = Constant.pixelsToMeters(new Vector2f(p));
+			points[i] = point;
+		}
+		shape.set(points, points.length);
+		return shape;
+	}
+	
+	protected CircleShape createShape(Circle circle) {
+		CircleShape shape = new CircleShape();
+		shape.m_p.set(Constant.pixelsToMeters(new Vector2f(circle.getCenter())));
+		shape.m_radius = Constant.pixelsToMeters(circle.radius);
+		return shape;
+	}
+	
+	protected PolygonShape createShape(Rectangle rect) {
+		PolygonShape shape = new PolygonShape();
+		float width = Constant.pixelsToMeters(rect.getWidth());
+		float height = Constant.pixelsToMeters(rect.getHeight());
+		Vec2 pos = Constant.pixelsToMeters(new Vector2f(rect.getCenter()));
+		shape.setAsBox(width / 2, height / 2, pos, 0);
+		return shape;
+	}
 }

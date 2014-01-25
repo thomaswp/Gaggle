@@ -34,8 +34,9 @@ public class Platform extends PhysicsObject {
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox(Constant.pixelsToMeters(rect.getWidth() / 2), 
 				Constant.pixelsToMeters(rect.getHeight()) / 2);
-		Fixture f = body.createFixture(shape, 1);
+		Fixture f = body.createFixture(createShape(this.rect), 1);
 		f.setUserData(this);
+		f.getFilterData().categoryBits = Constant.PLATFORM_BIT;
 	}
 	
 	@Override

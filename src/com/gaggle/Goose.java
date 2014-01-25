@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jbox2d.callbacks.QueryCallback;
 import org.jbox2d.collision.AABB;
-import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
@@ -15,6 +15,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
+import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 
@@ -22,38 +23,70 @@ import com.gaggle.Platform.PlatformType;
 
 public class Goose extends PhysicsObject {
 
+	private static float MAX_DENSITY = 60, MAX_SPEED = 15, MAX_ACCEL = 3, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 10;
+	
 	protected Circle circleA, circleB;
-	protected Rectangle rect;
+	protected Rectangle rect, rectBase;
+	protected Polygon plowA, plowB;
 	protected Chromosome chromosome;
 	protected List<GameObject> touchingPlatforms = new ArrayList<>();
 	protected World world;
 	protected Circle c = new Circle(0, 0, 5);
 	
 	protected int dir = 1;
-	protected float speed = 6, targetSpeed = speed;
+	protected float targetSpeed = 6;
 	
 	protected boolean isGrounded, isPlatformInFront, isLedgeInFront, isTouchingGoose, isUpsideDown;
+	protected boolean isMoving = true;
 	
 	public Goose(World world, Vector2f position, Chromosome chromosome) {
 		this.world = world;
 		this.chromosome = chromosome;
-		float radius = 40 * chromosome.scale;
+		float radius = MAX_SCALE * chromosome.scale;
 		circleA = new Circle(-radius / 2, 0, radius);
 		circleB = new Circle(radius / 2, 0, radius);
 		rect = new Rectangle(-radius * 0.75f, -radius * 0.95f, radius * 1.5f, radius * 1.9f);
+		
+		rectBase = new Rectangle(-radius * 1.5f, 0, radius * 3, radius * 0.9f);
+		
+		plowA = new Polygon(new float[] {
+				radius * 1.5f, 0, radius * 2, radius * 0.5f, radius * 1.5f, radius
+		});
+		plowB = new Polygon(new float[] {
+				-radius * 1.5f, 0, -radius * 2, radius, -radius * 1.5f, radius
+		});
+
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(Constant.pixelsToMeters(position));
 		body = world.createBody(bodyDef);
 		body.setType(BodyType.DYNAMIC);
-		for (int i = 0; i < 2; i++) {
-			CircleShape shape = new CircleShape();
-			shape.setRadius(Constant.pixelsToMeters(radius));
-			shape.m_p.x = Constant.pixelsToMeters(radius * (i - 0.5));
-			Fixture f = body.createFixture(shape, chromosome.density);
-			f.setRestitution(chromosome.restitution * 0.3f);
-			f.setUserData(this);
+		
+		addFixture(createShape(circleA));
+		addFixture(createShape(circleB));
+		addFixture(createShape(rectBase));
+		
+		Fixture[] plowFixes = new Fixture[] {
+			addFixture(createShape(plowA)),
+			addFixture(createShape(plowB)),
+		};
+		for (Fixture plowFix : plowFixes) {
+			plowFix.setRestitution(0);
+			plowFix.setFriction(1);
+			plowFix.getFilterData().categoryBits = Constant.PLOW_BIT;
+			plowFix.getFilterData().maskBits = Constant.PLOW_BIT;
 		}
+		
+		
 		c.setCenterX(radius);
+	}
+	
+	protected Fixture addFixture(Shape shape) {
+		Fixture f = body.createFixture(shape, chromosome.density * MAX_DENSITY);
+		f.setFriction(1);
+		f.setRestitution(chromosome.restitution * MAX_RESTITUTION);
+		f.setUserData(this);
+		f.getFilterData().categoryBits = Constant.GOOSE_BIT;
+		return f;
 	}
 	
 	public void addTouchingObject(GameObject platform) {
@@ -69,16 +102,16 @@ public class Goose extends PhysicsObject {
 		calculateConditions();
 		doActions();
 		
-		speed = Util.lerp(speed, targetSpeed, 0.9f);
-		if (isGrounded) {
-			body.applyForceToCenter(new Vec2(speed * body.m_mass * dir, 0));
+		if (isGrounded && !isUpsideDown && isMoving) {
+			Vec2 v = body.getLinearVelocity().clone();
+			v.x = Util.lerp(v.x, targetSpeed * dir, 0.95f);
+			body.setLinearVelocity(v);
 		}
 		
 	}
 
 	private void doActions() {
 		if (isPlatformInFront) {
-			System.out.println(isPlatformInFront);
 			turnAround();
 			speedUp();
 		}
@@ -125,7 +158,7 @@ public class Goose extends PhysicsObject {
 		}, new AABB(position, position));
 		isLedgeInFront = flag.value;
 		
-		isUpsideDown = ((body.getAngle() + Math.PI * 2) % (Math.PI * 2)) < Math.PI;
+		isUpsideDown = Math.abs(((body.getAngle() + Math.PI * 2) % (Math.PI * 2)) - Math.PI) < Math.PI * 0.6f;
 	}
 	
 	private void turnAround() {
@@ -134,13 +167,13 @@ public class Goose extends PhysicsObject {
 	
 	private void jump() {
 		if (isGrounded) {
-			body.applyForceToCenter(new Vec2(0, 10 * chromosome.jump * body.m_mass));
+			body.applyForceToCenter(new Vec2(0, MAX_JUMP * chromosome.jump * body.m_mass));
 		}
 	}
 	
 	private void speedUp() {
-		targetSpeed += chromosome.acceleration;
-		targetSpeed = Math.min(targetSpeed, chromosome.maxSpeed * 6);
+		targetSpeed += chromosome.acceleration * MAX_ACCEL;
+		targetSpeed = Math.min(targetSpeed, chromosome.maxSpeed * MAX_SPEED);
 	}
 	
 	private void slowDown() {
@@ -148,6 +181,9 @@ public class Goose extends PhysicsObject {
 		targetSpeed = Math.max(targetSpeed, 0);
 	}
 	
+	private void toggleMove() {
+		isMoving = !isMoving;
+	}
 	
 	private static class Flag {
 		public boolean value;
@@ -155,6 +191,8 @@ public class Goose extends PhysicsObject {
 
 	@Override
 	public void renderLocal(GameContainer container, Graphics g) {
+		g.scale(dir, 1);
+		
 		g.setColor(Color.red);
 		g.fill(circleA);
 		g.fill(circleB);
@@ -162,6 +200,11 @@ public class Goose extends PhysicsObject {
 		
 		g.setColor(Color.white);
 		g.fill(c);
+		g.fill(rectBase);
+		g.setColor(new Color(1, 1, 1, 0.3f));
+		g.fill(plowA);
+		g.fill(plowB);
+		
 	}
 
 }
