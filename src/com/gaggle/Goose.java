@@ -23,7 +23,7 @@ import com.gaggle.Platform.PlatformType;
 
 public class Goose extends PhysicsObject {
 
-	private static float MAX_DENSITY = 60, MAX_SPEED = 15, MAX_ACCEL = 3, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 10;
+	public static float MAX_DENSITY = 60, MAX_SPEED = 15, MAX_ACCEL = 3, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 10;
 	
 	protected Circle circleA, circleB;
 	protected Rectangle rect, rectBase;
@@ -32,6 +32,7 @@ public class Goose extends PhysicsObject {
 	protected List<GameObject> touchingPlatforms = new ArrayList<>();
 	protected World world;
 	protected Circle c = new Circle(0, 0, 5);
+	protected CreatureRenderer renderer;
 	
 	protected int dir = 1;
 	protected float targetSpeed = 6;
@@ -42,6 +43,7 @@ public class Goose extends PhysicsObject {
 	public Goose(World world, Vector2f position, Chromosome chromosome) {
 		this.world = world;
 		this.chromosome = chromosome;
+		this.renderer = new CreatureRenderer(chromosome);
 		float radius = MAX_SCALE * chromosome.scale;
 		circleA = new Circle(-radius / 2, 0, radius);
 		circleB = new Circle(radius / 2, 0, radius);
@@ -108,6 +110,7 @@ public class Goose extends PhysicsObject {
 			body.setLinearVelocity(v);
 		}
 		
+		renderer.update(delta, targetSpeed);
 	}
 
 	private void doActions() {
@@ -193,17 +196,21 @@ public class Goose extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.scale(dir, 1);
 		
-		g.setColor(Color.red);
+		
+		
+		g.setColor(new Color(1, 0, 0, 0.1f));
 		g.fill(circleA);
 		g.fill(circleB);
 		g.fill(rect);
 		
-		g.setColor(Color.white);
+		g.setColor(new Color(1, 1, 1, 0.1f));
 		g.fill(c);
 		g.fill(rectBase);
-		g.setColor(new Color(1, 1, 1, 0.3f));
+		g.setColor(new Color(1, 1, 1, 0.1f));
 		g.fill(plowA);
 		g.fill(plowB);
+		
+		renderer.render(g);
 		
 	}
 
