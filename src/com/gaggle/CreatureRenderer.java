@@ -37,7 +37,7 @@ public class CreatureRenderer {
 	private static FeatureMapping featureMapping = new FeatureMapping() {
 		@Override
 		protected void set(Chromosome chromosome) {
-			size = new Vector2f(chromosome.scale * Goose.MAX_SCALE * 2, chromosome.scale * Goose.MAX_SCALE * 1.5f);
+			size = new Vector2f(chromosome.scale * Goose.MAX_SCALE * 2.5f, chromosome.scale * Goose.MAX_SCALE * 1.5f);
 			this.foot = ShapeType.Circle;
 			this.body = ShapeType.Square;
 			this.head = ShapeType.Triangle;
@@ -87,6 +87,7 @@ public class CreatureRenderer {
 		double sze = size.getX()/40.0;
 		double spd = speed*8;
 		
+		g.translate(0, -size.getY() * 0.2f);
 		g.pushTransform();
 			g.setLineWidth(2);
 			g.scale(direction, 1);

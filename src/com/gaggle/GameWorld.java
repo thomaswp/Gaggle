@@ -40,7 +40,9 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		gameObjects.add(new Platform(world, new Rectangle(dw, -h, border, h + border), PlatformType.Wall));
 		gameObjects.add(new Platform(world, new Rectangle(-dw, 0, w + border, border), PlatformType.Floor));
 		gameObjects.add(new Goose(world, new Vector2f(0, -100), new Chromosome()));
-		gameObjects.add(new Goose(world, new Vector2f(-200, -100), new Chromosome()));
+		for (int i = 0; i < 5; i++) {
+			gameObjects.add(new Goose(world, new Vector2f(-300 + i * 50, -100), new Chromosome()));
+		}
 		
 		container.getInput().addMouseListener(this);
 	}
