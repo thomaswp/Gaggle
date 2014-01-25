@@ -89,8 +89,11 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 				}
 			}
 			gameObjects.remove(goose);
-			Chromosome c = chromosomes.get((int)(chromosomes.size() * Math.random())).clone();
-//			c.mutate();
+			goose.dispose();
+			Chromosome c1 = chromosomes.get((int)(chromosomes.size() * Math.random()));
+			Chromosome c2 = chromosomes.get((int)(chromosomes.size() * Math.random()));
+			Chromosome c = c1.breed(c2);
+			c.mutate();
 			Goose newGoose = new Goose(world, new Vector2f(-300 + (int)(Math.random() * 5) * 200, -100), c);
 			gameObjects.add(newGoose);
 			geese.add(newGoose);

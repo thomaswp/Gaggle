@@ -50,6 +50,10 @@ public class Goose extends PhysicsObject {
 		selected = !selected;
 	}
 	
+	public void dispose() {
+		world.destroyBody(body);
+	}
+	
 	public Goose(World world, Vector2f position, Chromosome chromosome) {
 		this.world = world;
 		this.chromosome = chromosome;
