@@ -1,6 +1,7 @@
 package com.gaggle;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Chromosome implements Cloneable {
@@ -96,17 +97,53 @@ public class Chromosome implements Cloneable {
 				}
 			} else {
 				//mutate a behavior
-				int b = rand.nextInt(behaviorList.size());
-				Behavior behavior = behaviorList.get(b);
-				double c = rand.nextDouble();
-				if(c < PRB_COND_MUT) {
-					//mutate conditional
-					behavior.condition = Condition.random();
-				} else {
-					//mutate action
-					behavior.action = Action.random();
+				if(behaviorList.size() > 0) {
+					int b = rand.nextInt(behaviorList.size());
+					Behavior behavior = behaviorList.get(b);
+					double c = rand.nextDouble();
+					if(c < PRB_COND_MUT) {
+						//mutate conditional
+						behavior.condition = Condition.random();
+					} else {
+						//mutate action
+						behavior.action = Action.random();
+					}
 				}
 			}
 		}
+	}
+	
+	
+	
+	public Chromosome breed(Chromosome other) {
+		Chromosome baby = new Chromosome();
+		baby.density = (float) selectRandom(density, other.density);
+		baby.acceleration = (float) selectRandom(acceleration, other.acceleration);
+		baby.scale = (float) selectRandom(scale, other.scale);
+		baby.maxSpeed = (float) selectRandom(maxSpeed, other.maxSpeed);
+		baby.restitution = (float) selectRandom(restitution, other.restitution);
+		baby.jump = (float) selectRandom(jump, other.jump);
+		
+		Iterator<Behavior> i1 = behaviorList.iterator();
+		Iterator<Behavior> i2 = other.behaviorList.iterator();
+		while(i1.hasNext() || i2.hasNext()) {
+			if(i1.hasNext() && i2.hasNext()) {
+				behaviorList.add(((Behavior)selectRandom(i1.next(),i2.next())).clone());
+			} else if(i1.hasNext()) {
+				behaviorList.add(i1.next().clone());
+			} else {
+				behaviorList.add(i2.next().clone());
+			}
+		}
+		
+		return baby;
+	}
+	
+	public static Object selectRandom(Object a, Object b) {
+		double r = rand.nextDouble();
+		if(r < .5) {
+			return a;
+		}
+		return b;
 	}
 }
