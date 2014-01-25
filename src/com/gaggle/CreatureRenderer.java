@@ -14,14 +14,14 @@ public class CreatureRenderer {
 	
 	private Vector2f size;
 	
-	private ShapeType foot;
-	private ShapeType body;
-	private ShapeType head;
+	public final ShapeType foot;
+	public final ShapeType body;
+	public final ShapeType head;
 	
-	private Shape leftFootShape;
-	private Shape rightFootShape;
-	private Shape bodyShape;
-	private Shape headShape;
+	public final Shape leftFootShape;
+	public final Shape rightFootShape;
+	public final Shape bodyShape;
+	public final Shape headShape;
 	
 	private Color bodyColor;
 	private Color footColor;
