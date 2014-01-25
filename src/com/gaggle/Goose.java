@@ -115,6 +115,9 @@ public class Goose extends PhysicsObject {
 
 		if ((isGrounded || isGooseUnder) && !isUpsideDown && isMoving) {
 			Vec2 v = body.getLinearVelocity().clone();
+			
+			float targetSpeed = this.targetSpeed;
+			if (isGooseUnder) targetSpeed *= 1.5f;
 			Vec2 targetVelocity = new Vec2((float) Math.cos(body.getAngle()) * targetSpeed, 
 					(float) Math.sin(body.getAngle()) * targetSpeed);
 			
@@ -219,23 +222,23 @@ public class Goose extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.scale(dir, 1);
 
-		float alpha = isGooseUnder ? 1 : 0.1f;
-		
-		g.setColor(new Color(1, 0, 0, alpha));
-		g.fill(circleA);
-		g.fill(circleB);
-		g.fill(rect);
-
-		g.setColor(new Color(0, 1, 1, alpha));
-		g.fill(c);
-		g.fill(rectBase);
-
-		g.pushTransform();
-		g.scale(dir, 1);
-		g.setColor(new Color(1, 1, 1, alpha));
-		g.fill(plowA);
-		g.fill(plowB);
-		g.popTransform();
+//		float alpha = isGooseUnder ? 1 : 0.1f;
+//		
+//		g.setColor(new Color(1, 0, 0, alpha));
+//		g.fill(circleA);
+//		g.fill(circleB);
+//		g.fill(rect);
+//
+//		g.setColor(new Color(0, 1, 1, alpha));
+//		g.fill(c);
+//		g.fill(rectBase);
+//
+//		g.pushTransform();
+//		g.scale(dir, 1);
+//		g.setColor(new Color(1, 1, 1, alpha));
+//		g.fill(plowA);
+//		g.fill(plowB);
+//		g.popTransform();
 
 		
 		renderer.render(g);

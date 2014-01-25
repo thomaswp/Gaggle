@@ -48,6 +48,8 @@ public class Platform extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.setColor(Color.blue);
 		g.fill(rect);
+		g.setColor(Color.black);
+		g.draw(rect);
 	}
 	
 }

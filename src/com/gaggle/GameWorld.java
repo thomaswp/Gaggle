@@ -26,11 +26,22 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	private Vector2f origin = new Vector2f();
 	private float scale = 1, targetScale = scale;
 	private Vector2f worldDimensions = new Vector2f(2800, 1200);
+	private float minScale;
+	private Vector2f resolution;
+	
+	Background background;
 	
 	public GameWorld(GameContainer container) {
 		world = new World(new Vec2(0, 10));
 		
 		world.setContactListener(this);
+		
+		minScale = Math.min(1, container.getWidth() / worldDimensions.x);
+		minScale = Math.min(minScale, container.getHeight() / worldDimensions.y);
+		
+		resolution = new Vector2f(container.getWidth(), container.getHeight());
+		
+		background = new Background();
 		
 		float w = worldDimensions.x, h = worldDimensions.y;
 		float dw = w / 2, dh = h / 2;
@@ -53,10 +64,14 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 			obj.update(container, delta);
 		}
 		scale = Util.lerp(scale, targetScale, 0.1f);
+		background.update(container, delta);
 	}
 
 	@Override
 	public void render(GameContainer container, Graphics g) {
+		
+		background.render(container, g, scale, origin);
+		
 		g.pushTransform();
 		g.translate(container.getWidth() / 2, container.getHeight() / 2);
 		g.scale(scale, scale);
@@ -67,6 +82,12 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		g.popTransform();
 	}
 
+	private void updateBounds() {
+		origin.x = Math.min(Math.max(origin.x, -worldDimensions.x / 2), worldDimensions.x / 2);
+		origin.y = Math.min(Math.max(origin.y, -worldDimensions.y), -worldDimensions.y / 6 / scale);
+		Debug.log(origin);
+	}
+	
 	@Override
 	public void inputEnded() { }
 
@@ -90,6 +111,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
 		origin.x -= (newx - oldx) / scale;
 		origin.y -= (newy - oldy) / scale;
+		updateBounds();
 	}
 
 	@Override
@@ -110,6 +132,8 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	@Override
 	public void mouseWheelMoved(int change) {
 		targetScale *= Math.pow(1.001, change);
+		targetScale = Math.min(Math.max(minScale, targetScale), 10f);
+		updateBounds();
 	}
 
 	private void handleBeginContact(GameObject o1, GameObject o2, boolean firstPass) {
