@@ -80,9 +80,9 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 			gameObjects.add(obj);
 		}
 		
-		for (int i = 0; i < level.getMaxPool(); i++) {
-			chromosomes.add(new Chromosome(level.getActionCount()));
-		}
+//		for (int i = 0; i < level.getMaxPool(); i++) {
+//			chromosomes.add(new Chromosome(level.getActionCount()));
+//		}
 		
 		Debug.log(chromosomes.size());
 	}
@@ -119,8 +119,21 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 				removeGoose(goose);
 			}
 			
-			Chromosome c1 = chromosomes.get((int)(chromosomes.size() * Math.random()));
-			Chromosome c2 = chromosomes.get((int)(chromosomes.size() * Math.random()));
+			Chromosome c1, c2;
+			
+			if(chromosomes.size() > 0) {
+				double prbOld = chromosomes.size()/(double) level.getMaxPool();
+				if(Math.random() < prbOld) {
+					c1 = chromosomes.get((int)(chromosomes.size() * Math.random()));
+					c2 = chromosomes.get((int)(chromosomes.size() * Math.random()));
+				} else {
+					c1 = new Chromosome(level.getActionCount());
+					c2 = new Chromosome(level.getActionCount());
+				}
+			} else {
+				c1 = new Chromosome(level.getActionCount());
+				c2 = new Chromosome(level.getActionCount());
+			}
 			Chromosome c = c1.breed(c2);
 			c.mutate();
 			Goose newGoose = new Goose(world, level.getRandomSpawn(), c);

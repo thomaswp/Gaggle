@@ -8,24 +8,29 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 
-public class Level2 extends Level {
+import com.gaggle.Platform.PlatformType;
+
+public class Level4 extends Level {
 
 	@Override
 	public Rectangle getSpawn() {
-		return new Rectangle(-1300, -300, 200, 200);
+		return new Rectangle(-1300, -800, 200, 200);
 	}
 
 	@Override
 	public Rectangle getGoal() {
-		return new Rectangle(1000, -200, 200, 200);
+		return new Rectangle(1000, -600, 200, 200);
 	}
 
 	@Override
 	public List<PhysicsObject> getObjects(World world) {
 		ArrayList<PhysicsObject> objects = new ArrayList<>();
 		
-		objects.add(new Box(world, new Rectangle(0, -75, 150, 150), new Color(0x91794C), 100, 200));
-		objects.add(new Box(world, new Rectangle(50, -225, 150, 150), new Color(0x91794C), 100, 200));
+		Color borderColor = new Color(0x4D5FB3);
+		objects.add(new Platform(world, new Rectangle(-1350, -400, 1150, 400), PlatformType.Ceiling, borderColor));	
+		objects.add(new Platform(world, new Rectangle(200, -400, 1200, 400), PlatformType.Ceiling, borderColor));	
+//		objects.add(new Box(world, new Rectangle(0, -75, 150, 150), new Color(0x91794C), 100, 200));
+//		objects.add(new Box(world, new Rectangle(50, -225, 150, 150), new Color(0x91794C), 100, 200));
 		
 		return objects;
 	}
@@ -57,7 +62,7 @@ public class Level2 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level3();
+		return new Level1();
 	}
 
 }

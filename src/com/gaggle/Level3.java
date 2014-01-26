@@ -8,7 +8,9 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 
-public class Level2 extends Level {
+import com.gaggle.Platform.PlatformType;
+
+public class Level3 extends Level {
 
 	@Override
 	public Rectangle getSpawn() {
@@ -24,8 +26,10 @@ public class Level2 extends Level {
 	public List<PhysicsObject> getObjects(World world) {
 		ArrayList<PhysicsObject> objects = new ArrayList<>();
 		
-		objects.add(new Box(world, new Rectangle(0, -75, 150, 150), new Color(0x91794C), 100, 200));
-		objects.add(new Box(world, new Rectangle(50, -225, 150, 150), new Color(0x91794C), 100, 200));
+		Color borderColor = new Color(0x4D5FB3);
+		objects.add(new Platform(world, new Rectangle(0, -1200, 50, 1180), PlatformType.Ceiling, borderColor));	
+//		objects.add(new Box(world, new Rectangle(0, -75, 150, 150), new Color(0x91794C), 100, 200));
+//		objects.add(new Box(world, new Rectangle(50, -225, 150, 150), new Color(0x91794C), 100, 200));
 		
 		return objects;
 	}
@@ -57,7 +61,7 @@ public class Level2 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level3();
+		return new Level4();
 	}
 
 }

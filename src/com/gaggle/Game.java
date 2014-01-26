@@ -36,7 +36,6 @@ public class Game extends BasicGame {
 		
 		CreatureMap.initRandomMap();
 		
-		
 		AppGameContainer app =
 				new AppGameContainer(new Game());
 
