@@ -135,8 +135,10 @@ public class Goose extends PhysicsObject {
 		calculateConditions();
 		doActions();
 		
-		if ((isGrounded || isGooseUnder) && !isUpsideDown && isMoving) {
+		if (!isUpsideDown && isMoving) {
 			Vec2 v = body.getLinearVelocity().clone();
+			
+			boolean grounded = (isGrounded || isGooseUnder);
 			
 			float targetSpeed = this.targetSpeed;
 			if (isGooseUnder) targetSpeed *= 1.5f;
@@ -144,8 +146,12 @@ public class Goose extends PhysicsObject {
 					(float) Math.sin(body.getAngle()) * targetSpeed);
 			
 //			targetVelocity.y = Math.min(targetVelocity.y, v.y);
-			v.x = Util.lerp(v.x, targetVelocity.x * dir, 0.05f);
-			v.y = Util.lerp(v.y, -targetVelocity.y, 0.05f);
+			if (grounded) {
+				v.x = Util.lerp(v.x, targetVelocity.x * dir, 0.05f);
+				v.y = Util.lerp(v.y, -targetVelocity.y, 0.05f);
+			} else {
+				v.x = Util.lerp(v.x, targetVelocity.x * dir, 0.002f);
+			}
 			body.setLinearVelocity(v);
 		}
 
@@ -175,7 +181,7 @@ public class Goose extends PhysicsObject {
 		case PlatformInFront: return isPlatformInFront;
 		case Ledge: return isLedgeInFront;
 		case Touching: return isTouchingGoose;
-		case UpsideDown: return isUpsideDown;
+//		case UpsideDown: return isUpsideDown;
 		}
 		return false;
 	}
@@ -183,10 +189,10 @@ public class Goose extends PhysicsObject {
 	private void doAction(Action action) {
 		switch (action) {
 			case Jump: jump(); break;
-			case SlowDown: slowDown(); break;
-			case SpeedUp: speedUp(); break;
-			case StartStop: toggleMove(); break;
-			case Turn: turnAround(); break;
+//			case SlowDown: slowDown(); break;
+//			case SpeedUp: speedUp(); break;
+//			case StartStop: toggleMove(); break;
+//			case Turn: turnAround(); break;
 		}
 	}
 	
@@ -228,7 +234,7 @@ public class Goose extends PhysicsObject {
 		}, new AABB(position, position));
 		isTouchingGoose = gooseFlag.value;
 		
-		position.x += Constant.pixelsToMeters(circleA.radius * 1.7f * dir);
+		position.x += Constant.pixelsToMeters(circleA.radius * 2f * dir);
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {

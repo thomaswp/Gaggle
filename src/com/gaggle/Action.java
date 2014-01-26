@@ -3,7 +3,7 @@ package com.gaggle;
 import java.util.Random;
 
 public enum Action {
-	SpeedUp, SlowDown, Turn, Jump, StartStop;
+	Jump; //SpeedUp, SlowDown, Turn, Jump, StartStop;
 	
 	private static Action[] vals = values();
 	private static Random rand = new Random();
