@@ -317,23 +317,23 @@ public class Goose extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.scale(dir, 1);
 
-		float alpha = isPlatformInFront ? 1 : 0.1f;
-		
-		g.setColor(new Color(1, 0, 0, alpha));
-		g.fill(circleA);
-		g.fill(circleB);
-		g.fill(rect);
-
-		g.setColor(new Color(0, 1, 1, alpha));
-		g.fill(c);
-		g.fill(rectBase);
-
-		g.pushTransform();
-		g.scale(dir, 1);
-		g.setColor(new Color(1, 1, 1, alpha));
-		g.fill(plowA);
-		g.fill(plowB);
-		g.popTransform();
+//		float alpha = isPlatformInFront ? 1 : 0.1f;
+//		
+//		g.setColor(new Color(1, 0, 0, alpha));
+//		g.fill(circleA);
+//		g.fill(circleB);
+//		g.fill(rect);
+//
+//		g.setColor(new Color(0, 1, 1, alpha));
+//		g.fill(c);
+//		g.fill(rectBase);
+//
+//		g.pushTransform();
+//		g.scale(dir, 1);
+//		g.setColor(new Color(1, 1, 1, alpha));
+//		g.fill(plowA);
+//		g.fill(plowB);
+//		g.popTransform();
 
 		renderer.render(g, selected);
 
