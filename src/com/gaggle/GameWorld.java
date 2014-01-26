@@ -9,6 +9,7 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -20,30 +21,34 @@ import com.gaggle.Platform.PlatformType;
 
 
 public class GameWorld implements GameObject, MouseListener, ContactListener {
-
-	private final static int SPAWN_TIME = 5000;
-	private static final int MAX_POOL = 10;
 	
 	private World world;
 	private List<GameObject> gameObjects = new ArrayList<>();
 	private Vector2f origin = new Vector2f();
 	private float scale = 1, targetScale = scale;
-	private Vector2f worldDimensions = new Vector2f(2800, 1200);
 	private float minScale;
 	private Vector2f resolution;
 	private List<Goose> geese = new ArrayList<>();
 	private List<Chromosome> chromosomes = new ArrayList<>();
+	private Level level;
 	
 	private Background background;
 	
-	private int untilSpawn = SPAWN_TIME;
+	private int untilSpawn;
+	private Vector2f worldDimensions;
+	private Rectangle spawn, goal;
 	
-	
-	public GameWorld(GameContainer container) {
+	public GameWorld(GameContainer container, Level level) {
+		this.level = level;
+		
+		untilSpawn = level.getSpawnTime();
+		worldDimensions = level.getDimensions();
+		spawn = level.getSpawn();
+		goal = level.getGoal();
+		
 		world = new World(new Vec2(0, 10));
-		
 		world.setContactListener(this);
-		
+				
 		minScale = Math.min(1, container.getWidth() / worldDimensions.x);
 		minScale = Math.min(minScale, container.getHeight() / worldDimensions.y);
 		
@@ -54,17 +59,18 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		float w = worldDimensions.x, h = worldDimensions.y;
 		float dw = w / 2;
 		float border = 50;
-		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, w, border), PlatformType.Ceiling));
-		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, border, h), PlatformType.Wall));
-		gameObjects.add(new Platform(world, new Rectangle(dw, -h, border, h + border), PlatformType.Wall));
-		gameObjects.add(new Platform(world, new Rectangle(-dw, 0, w + border, border), PlatformType.Floor));
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				Goose goose = new Goose(world, new Vector2f(-300 + i * 200, -100 - 100*j), new Chromosome(1));
-				geese.add(goose);
-				chromosomes.add(goose.chromosome);
-				gameObjects.add(goose);
-			}
+		Color borderColor = new Color(0x4D5FB3);
+		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, w, border), PlatformType.Ceiling, borderColor));
+		gameObjects.add(new Platform(world, new Rectangle(-dw, -h, border, h), PlatformType.Wall, borderColor));
+		gameObjects.add(new Platform(world, new Rectangle(dw, -h, border, h + border), PlatformType.Wall, borderColor));
+		gameObjects.add(new Platform(world, new Rectangle(-dw, 0, w + border, border), PlatformType.Floor, borderColor));
+		
+		for (GameObject obj : level.getObjects(world)) {
+			gameObjects.add(obj);
+		}
+		
+		for (int i = 0; i < level.getMaxPool(); i++) {
+			chromosomes.add(new Chromosome(level.getActionCount()));
 		}
 		
 		container.getInput().addMouseListener(this);
@@ -79,24 +85,27 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		scale = Util.lerp(scale, targetScale, 0.1f);
 		background.update(container, delta);
 		
-		untilSpawn -= delta;
+		untilSpawn -= delta * (geese.size() == level.getMaxGeese() ? 1 : 5);
 		if (untilSpawn <= 0) {
-			untilSpawn += SPAWN_TIME;
+			untilSpawn += level.getSpawnTime();
 			
-			Goose goose = geese.remove(0);
-			if (goose.isSelected()) {
-				chromosomes.add(goose.chromosome);
-				if (chromosomes.size() > MAX_POOL) {
-					chromosomes.remove(0);
+			if (geese.size() >= level.getMaxGeese()) {
+				Goose goose = geese.remove(0);
+				if (goose.isSelected()) {
+					chromosomes.add(goose.chromosome);
+					if (chromosomes.size() > level.getMaxPool()) {
+						chromosomes.remove(0);
+					}
 				}
+				gameObjects.remove(goose);
+				goose.dispose();
 			}
-			gameObjects.remove(goose);
-			goose.dispose();
+			
 			Chromosome c1 = chromosomes.get((int)(chromosomes.size() * Math.random()));
 			Chromosome c2 = chromosomes.get((int)(chromosomes.size() * Math.random()));
 			Chromosome c = c1.breed(c2);
 			c.mutate();
-			Goose newGoose = new Goose(world, new Vector2f(-300 + (int)(Math.random() * 5) * 200, -100), c);
+			Goose newGoose = new Goose(world, level.getRandomSpawn(), c);
 			gameObjects.add(newGoose);
 			geese.add(newGoose);
 		}
@@ -111,6 +120,17 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		g.translate(container.getWidth() / 2, container.getHeight() / 2);
 		g.scale(scale, scale);
 		g.translate(-origin.x, -origin.y);
+		
+		g.setColor(new Color(0xAA9DA6D1));
+		g.fill(spawn);
+		g.setColor(new Color(0xAA000000));
+		g.draw(spawn);
+		
+		g.setColor(new Color(0xAA6EEBA8));
+		g.fill(goal);
+		g.setColor(new Color(0xAA000000));
+		g.draw(goal);
+		
 		for (GameObject obj : gameObjects) {
 			obj.render(container, g);
 		}

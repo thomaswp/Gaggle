@@ -25,7 +25,7 @@ public class Chromosome implements Cloneable {
 	}
 	
 	public Chromosome() {
-		this(0);
+		this(1);
 	}
 	
 	public float getPseudorandom() {

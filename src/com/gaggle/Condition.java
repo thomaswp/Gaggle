@@ -3,7 +3,7 @@ package com.gaggle;
 import java.util.Random;
 
 public enum Condition {
-	Grounded, InFront, Ledge, Touching, UpsideDown;
+	BoxInFront, PlatformInFront, Ledge, Touching, UpsideDown;
 	
 	private static Condition[] vals = values();
 	private static Random rand = new Random();

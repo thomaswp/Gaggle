@@ -19,13 +19,15 @@ public class Platform extends PhysicsObject {
 	
 	protected Rectangle rect = new Rectangle(0, 0, 0, 0);
 	public final PlatformType type;
+	protected final Color color;
 	
-	public Platform(World world, Rectangle rect, PlatformType type) {
+	public Platform(World world, Rectangle rect, PlatformType type, Color color) {
 		this.rect.setWidth(rect.getWidth());
 		this.rect.setHeight(rect.getHeight());
 		this.rect.setCenterX(0);
 		this.rect.setCenterY(0);
 		this.type = type;
+		this.color = color;
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(Constant.pixelsToMeters(rect.getCenterX()), 
 				Constant.pixelsToMeters(rect.getCenterY()));
@@ -46,7 +48,7 @@ public class Platform extends PhysicsObject {
 
 	@Override
 	public void renderLocal(GameContainer container, Graphics g) {
-		g.setColor(Color.blue);
+		g.setColor(color);
 		g.fill(rect);
 		g.setColor(Color.black);
 		g.draw(rect);

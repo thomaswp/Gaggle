@@ -23,8 +23,10 @@ import com.gaggle.Platform.PlatformType;
 
 public class Goose extends PhysicsObject {
 
-	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 3, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 10;
+	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 5, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 20;
 
+	public final static boolean COLLISION = false;
+	
 	protected Circle circleA, circleB;
 	protected Rectangle rect, rectBase;
 	protected Polygon plowA, plowB;
@@ -34,14 +36,16 @@ public class Goose extends PhysicsObject {
 	protected Circle c = new Circle(0, 0, 5);
 	protected CreatureRenderer renderer;
 
-	protected int dir = 1;
+	protected int dir = Math.random() > 0.5 ? 1 : -1;
 	protected float targetSpeed;
 
-	protected boolean isGrounded, isPlatformInFront, isLedgeInFront, isTouchingGoose, isUpsideDown, isGooseUnder;
+	protected boolean isGrounded, isPlatformInFront, isLedgeInFront, isBoxInFront, isTouchingGoose, isUpsideDown, isGooseUnder;
 	protected Vec2 gooseUnderVelocity = new Vec2();
 	protected boolean isMoving = true, selected;
+	protected int actionCooldown = 0;
 
-
+	protected int behaviorIndex;
+	
 	public boolean isSelected() {
 		return selected;
 	}
@@ -88,8 +92,9 @@ public class Goose extends PhysicsObject {
 
 		Fixture weight = addFixture(createShape(new Circle(0, radius*2, radius * 0.2f)));
 		weight.getFilterData().maskBits = 0;
-		weight.setDensity(10000);
+		weight.setDensity(10 * (COLLISION ? 1000 : 1));
 
+		if (COLLISION) {
 		Fixture[] plowFixes = new Fixture[] {
 				addFixture(createShape(plowA)),
 				addFixture(createShape(plowB)),
@@ -99,6 +104,7 @@ public class Goose extends PhysicsObject {
 			plowFix.setFriction(1);
 			plowFix.getFilterData().categoryBits = Constant.GOOSE_BIT | Constant.PLOW_BIT;
 			plowFix.getFilterData().maskBits =  Constant.GOOSE_BIT | Constant.PLOW_BIT;
+		}
 		}
 
 		c.setCenterX(radius);
@@ -110,6 +116,7 @@ public class Goose extends PhysicsObject {
 		f.setRestitution(chromosome.restitution * MAX_RESTITUTION);
 		f.setUserData(this);
 		f.getFilterData().categoryBits = Constant.GOOSE_BIT;
+		if (!COLLISION) f.getFilterData().maskBits ^= Constant.GOOSE_BIT;
 		return f;
 	}
 
@@ -123,9 +130,11 @@ public class Goose extends PhysicsObject {
 
 	@Override
 	public void update(GameContainer container, int delta) {
+		if (actionCooldown > 0) actionCooldown = Math.max(actionCooldown - delta, 0);
+		
 		calculateConditions();
 		doActions();
-
+		
 		if ((isGrounded || isGooseUnder) && !isUpsideDown && isMoving) {
 			Vec2 v = body.getLinearVelocity().clone();
 			
@@ -134,9 +143,9 @@ public class Goose extends PhysicsObject {
 			Vec2 targetVelocity = new Vec2((float) Math.cos(body.getAngle()) * targetSpeed, 
 					(float) Math.sin(body.getAngle()) * targetSpeed);
 			
-			targetVelocity.y = Math.max(targetVelocity.y, v.y);
-			v.x = Util.lerp(v.x, targetVelocity.x * dir, 0.005f);
-			v.y = Util.lerp(v.y, -targetVelocity.y, 0.005f);
+//			targetVelocity.y = Math.min(targetVelocity.y, v.y);
+			v.x = Util.lerp(v.x, targetVelocity.x * dir, 0.05f);
+			v.y = Util.lerp(v.y, -targetVelocity.y, 0.05f);
 			body.setLinearVelocity(v);
 		}
 
@@ -144,12 +153,43 @@ public class Goose extends PhysicsObject {
 	}
 
 	private void doActions() {
-		if (isPlatformInFront) {
+		Behavior behavior = chromosome.behaviorList.get(behaviorIndex);		
+		
+		if (isPlatformInFront && behavior.condition != Condition.PlatformInFront) {
 			turnAround();
-			speedUp();
+		}
+		if (isBoxInFront && behavior.condition != Condition.BoxInFront) {
+			turnAround();
+		}
+
+		if (actionCooldown == 0 && isConditionMet(behavior.condition)) {
+			doAction(behavior.action);
+			behaviorIndex = (behaviorIndex + 1) % chromosome.behaviorList.size();
+			actionCooldown = 1000;
 		}
 	}
+	
+	private boolean isConditionMet(Condition condition) {
+		switch (condition) {
+		case BoxInFront: return isBoxInFront;
+		case PlatformInFront: return isPlatformInFront;
+		case Ledge: return isLedgeInFront;
+		case Touching: return isTouchingGoose;
+		case UpsideDown: return isUpsideDown;
+		}
+		return false;
+	}
 
+	private void doAction(Action action) {
+		switch (action) {
+			case Jump: jump(); break;
+			case SlowDown: slowDown(); break;
+			case SpeedUp: speedUp(); break;
+			case StartStop: toggleMove(); break;
+			case Turn: turnAround(); break;
+		}
+	}
+	
 	private void calculateConditions() {
 		isGrounded = isTouchingGoose = isGooseUnder = false;
 		for (GameObject obj : touchingPlatforms) {
@@ -170,35 +210,52 @@ public class Goose extends PhysicsObject {
 			}
 		}
 
-		final Flag flag = new Flag();
+		final Flag platformFlag = new Flag();
+		final Flag boxFlag = new Flag();
+		final Flag gooseFlag = new Flag();
+		
 		Vec2 position = body.getPosition().clone();
-		position.x += Constant.pixelsToMeters(circleA.radius * 1.7f * dir);
-
+		
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {
-				if (fixture.getUserData() instanceof Platform) {
-					flag.value = true;
+				if (fixture.getUserData() instanceof Goose) {
+					gooseFlag.value = true;
 					return false;
 				}
 				return true;
 			}
 		}, new AABB(position, position));
-		isPlatformInFront = flag.value;
+		isTouchingGoose = gooseFlag.value;
+		
+		position.x += Constant.pixelsToMeters(circleA.radius * 1.7f * dir);
+		world.queryAABB(new QueryCallback() {
+			@Override
+			public boolean reportFixture(Fixture fixture) {
+				if (fixture.getUserData() instanceof Platform) {
+					platformFlag.value = true;
+				} else if (fixture.getUserData() instanceof Box) {
+					boxFlag.value = true;
+				}
+				return platformFlag.value && boxFlag.value;
+			}
+		}, new AABB(position, position));
+		isPlatformInFront = platformFlag.value;
+		isBoxInFront = boxFlag.value;
 
-		flag.value = false;
+		platformFlag.value = false;
 		position.y += Constant.pixelsToMeters(circleA.radius * 0.7f);
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {
 				if (fixture.getUserData() instanceof Platform) {
-					flag.value = true;
+					platformFlag.value = true;
 					return false;
 				}
 				return true;
 			}
 		}, new AABB(position, position));
-		isLedgeInFront = flag.value;
+		isLedgeInFront = platformFlag.value;
 
 		isUpsideDown = Math.abs(((body.getAngle() + Math.PI * 2) % (Math.PI * 2)) - Math.PI) < Math.PI * 0.6f;
 	}
@@ -208,8 +265,10 @@ public class Goose extends PhysicsObject {
 	}
 
 	private void jump() {
-		if (isGrounded) {
-			body.applyForceToCenter(new Vec2(0, MAX_JUMP * chromosome.jump * body.m_mass));
+		if (isGrounded || isGooseUnder) {
+			Vec2 velocity = body.getLinearVelocity().clone();
+			velocity.y += -MAX_JUMP * chromosome.jump;
+			body.setLinearVelocity(velocity);
 		}
 	}
 

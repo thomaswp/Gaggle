@@ -7,7 +7,7 @@ public class Constant {
 	public final static int PIXELS_PER_METER = 30;
 	public final static float DEGREES_PER_RADIAN = 180 / (float) Math.PI;
 	
-	public final static int PLATFORM_BIT = 1, GOOSE_BIT = 2, PLOW_BIT = 4;
+	public final static int PLATFORM_BIT = 1, GOOSE_BIT = 2, PLOW_BIT = 4, BOX_BIT = 8;
 	
 	public static float pixelsToMeters(double pixels) {
 		return (float) pixels / PIXELS_PER_METER;
