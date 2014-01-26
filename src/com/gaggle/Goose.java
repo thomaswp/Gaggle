@@ -343,5 +343,9 @@ public class Goose extends PhysicsObject {
 		return false;
 	}
 
+	public Vector2f getPosition() {
+		return Constant.metersToPixels(body.getPosition());
+	}
+
 }
 

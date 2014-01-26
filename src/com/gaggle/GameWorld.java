@@ -1,5 +1,6 @@
 package com.gaggle;
 
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 
@@ -37,22 +39,31 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	private int untilSpawn;
 	private Vector2f worldDimensions;
 	private Rectangle spawn, goal;
+	private int pointsRemaining;
+	private TrueTypeFont font;
 	
 	public GameWorld(GameContainer container, Level level) {
+		world = new World(new Vec2(0, 10));
+		world.setContactListener(this);
+		resolution = new Vector2f(container.getWidth(), container.getHeight());
+		container.getInput().addMouseListener(this);
+		loadLevel(level);
+	}
+
+	private void loadLevel(Level level) {
 		this.level = level;
 		
 		untilSpawn = level.getSpawnTime();
 		worldDimensions = level.getDimensions();
 		spawn = level.getSpawn();
 		goal = level.getGoal();
+		pointsRemaining = level.getMaxGeese() / 2;
 		
-		world = new World(new Vec2(0, 10));
-		world.setContactListener(this);
+		font = new TrueTypeFont(new Font("Arial", Font.BOLD, 50), true);
 				
-		minScale = Math.min(1, container.getWidth() / worldDimensions.x);
-		minScale = Math.min(minScale, container.getHeight() / worldDimensions.y);
+		minScale = Math.min(1, resolution.x / worldDimensions.x);
+		minScale = Math.min(minScale,  resolution.y / worldDimensions.y);
 		
-		resolution = new Vector2f(container.getWidth(), container.getHeight());
 		
 		background = new Background();
 		
@@ -73,7 +84,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 			chromosomes.add(new Chromosome(level.getActionCount()));
 		}
 		
-		container.getInput().addMouseListener(this);
+		Debug.log(chromosomes.size());
 	}
 
 	@Override
@@ -85,20 +96,27 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		scale = Util.lerp(scale, targetScale, 0.1f);
 		background.update(container, delta);
 		
+		for (int i = 0; i < geese.size(); i++) {
+			Goose goose = geese.get(i);
+			Vector2f pos = goose.getPosition();
+			if (goal.contains(pos.x, pos.y)) {
+				removeGoose(goose);
+				i--;
+				pointsRemaining--;
+				if (checkWin()) {
+					return;
+				}
+			}
+		}
+		
+		if (level == null) return;
 		untilSpawn -= delta * (geese.size() == level.getMaxGeese() ? 1 : 5);
 		if (untilSpawn <= 0) {
 			untilSpawn += level.getSpawnTime();
 			
 			if (geese.size() >= level.getMaxGeese()) {
-				Goose goose = geese.remove(0);
-				if (goose.isSelected()) {
-					chromosomes.add(goose.chromosome);
-					if (chromosomes.size() > level.getMaxPool()) {
-						chromosomes.remove(0);
-					}
-				}
-				gameObjects.remove(goose);
-				goose.dispose();
+				Goose goose = geese.get(0);
+				removeGoose(goose);
 			}
 			
 			Chromosome c1 = chromosomes.get((int)(chromosomes.size() * Math.random()));
@@ -109,6 +127,37 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 			gameObjects.add(newGoose);
 			geese.add(newGoose);
 		}
+	}
+
+	private boolean checkWin() {
+		if (pointsRemaining == 0) {
+			for (Goose goose : geese) {
+				goose.dispose();
+			}
+			gameObjects.clear();
+			geese.clear();
+			chromosomes.clear();
+			Level next = level.nextLevel();
+			if (next != null) {
+				loadLevel(next);
+			} else {
+				level = null;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private void removeGoose(Goose goose) {
+		geese.remove(goose);
+		if (goose.isSelected()) {
+			chromosomes.add(goose.chromosome);
+			if (chromosomes.size() > level.getMaxPool()) {
+				chromosomes.remove(0);
+			}
+		}
+		gameObjects.remove(goose);
+		goose.dispose();
 	}
 
 	@Override
@@ -130,6 +179,10 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		g.fill(goal);
 		g.setColor(new Color(0xAA000000));
 		g.draw(goal);
+		g.setFont(font);
+		String text = "" + pointsRemaining;
+		float w = font.getWidth(text);
+		g.drawString(text, goal.getCenterX() - w / 2, goal.getCenterY() - font.getHeight() / 2);
 		
 		for (GameObject obj : gameObjects) {
 			obj.render(container, g);

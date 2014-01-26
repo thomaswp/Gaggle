@@ -15,6 +15,7 @@ public abstract class Level {
 	public abstract int getMaxPool();
 	public abstract int getSpawnTime();
 	public abstract int getActionCount();
+	public abstract Level nextLevel();
 	
 	protected Vector2f getRandomSpawn() {
 		Rectangle spawn = getSpawn();
