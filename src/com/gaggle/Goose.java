@@ -10,6 +10,7 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
@@ -166,6 +167,8 @@ public class Goose extends PhysicsObject {
 		} else if (isBoxInFront && behavior.condition != Condition.BoxInFront) {
 			turnAround();
 		}
+		
+	
 
 		if (actionCooldown == 0 && isConditionMet(behavior.condition)) {
 			doAction(behavior.action);
@@ -249,18 +252,18 @@ public class Goose extends PhysicsObject {
 		isBoxInFront = boxFlag.value;
 
 		platformFlag.value = false;
-		position.y += Constant.pixelsToMeters(circleA.radius * 0.7f);
+		position.y += Constant.pixelsToMeters(circleA.radius * 1.5f);
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {
-				if (fixture.getUserData() instanceof Platform) {
+				if (fixture.getUserData() instanceof Platform || fixture.getUserData() instanceof Box) {
 					platformFlag.value = true;
 					return false;
 				}
 				return true;
 			}
 		}, new AABB(position, position));
-		isLedgeInFront = platformFlag.value;
+		isLedgeInFront = !platformFlag.value;
 
 		isUpsideDown = Math.abs(((body.getAngle() + Math.PI * 2) % (Math.PI * 2)) - Math.PI) < Math.PI * 0.6f;
 	}
@@ -299,7 +302,7 @@ public class Goose extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.scale(dir, 1);
 
-//		float alpha = isGooseUnder ? 1 : 0.1f;
+//		float alpha = isLedgeInFront ? 1 : 0.1f;
 //		
 //		g.setColor(new Color(1, 0, 0, alpha));
 //		g.fill(circleA);

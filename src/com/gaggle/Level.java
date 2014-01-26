@@ -16,6 +16,7 @@ public abstract class Level {
 	public abstract int getSpawnTime();
 	public abstract int getActionCount();
 	public abstract Level nextLevel();
+	public abstract int getRegenerationRate();
 	
 	protected Vector2f getRandomSpawn() {
 		Rectangle spawn = getSpawn();
@@ -23,6 +24,11 @@ public abstract class Level {
 		float offY = (float) (Math.random() * spawn.getHeight());
 		return new Vector2f(spawn.getX() + offX, spawn.getY() + offY);
 	}
+	
+	public int getPointsToWin() {
+		return getMaxGeese() / 2;
+	}
 
 }
+
 

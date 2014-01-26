@@ -41,6 +41,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	private Rectangle spawn, goal;
 	private int pointsRemaining;
 	private TrueTypeFont font;
+	private int regenTimer;
 	
 	public GameWorld(GameContainer container, Level level) {
 		world = new World(new Vec2(0, 10));
@@ -57,7 +58,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		worldDimensions = level.getDimensions();
 		spawn = level.getSpawn();
 		goal = level.getGoal();
-		pointsRemaining = level.getMaxGeese() / 2;
+		pointsRemaining = level.getPointsToWin();
 		
 		font = new TrueTypeFont(new Font("Arial", Font.BOLD, 50), true);
 				
@@ -84,6 +85,8 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 //			chromosomes.add(new Chromosome(level.getActionCount()));
 //		}
 		
+		regenTimer = 0;
+		
 		Debug.log(chromosomes.size());
 	}
 
@@ -103,10 +106,17 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 				removeGoose(goose);
 				i--;
 				pointsRemaining--;
+				regenTimer = level.getRegenerationRate();
 				if (checkWin()) {
 					return;
 				}
 			}
+		}
+		
+		regenTimer += delta;
+		if (level.getRegenerationRate() > 0 && regenTimer > level.getRegenerationRate()) {
+			regenTimer -= level.getRegenerationRate();
+			pointsRemaining = Math.min(pointsRemaining + 1, level.getPointsToWin());
 		}
 		
 		if (level == null) return;
@@ -119,6 +129,13 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 				removeGoose(goose);
 			}
 			
+			createNewGoose();
+		}
+	}
+
+	private void createNewGoose() {
+		Chromosome c;
+		if (Math.random() < 0.5) {
 			Chromosome c1, c2;
 			
 			if(chromosomes.size() > 0) {
@@ -134,12 +151,18 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 				c1 = new Chromosome(level.getActionCount());
 				c2 = new Chromosome(level.getActionCount());
 			}
-			Chromosome c = c1.breed(c2);
-			c.mutate();
-			Goose newGoose = new Goose(world, level.getRandomSpawn(), c);
-			gameObjects.add(newGoose);
-			geese.add(newGoose);
+			c = c1.breed(c2);
+		} else {
+			if(chromosomes.size() > 0) {
+				c = chromosomes.get((int)(chromosomes.size() * Math.random())).clone();
+			} else {
+				c = new Chromosome(level.getActionCount());
+			}
 		}
+		c.mutate();
+		Goose newGoose = new Goose(world, level.getRandomSpawn(), c);
+		gameObjects.add(newGoose);
+		geese.add(newGoose);
 	}
 
 	private boolean checkWin() {

@@ -60,4 +60,9 @@ public class Level2 extends Level {
 		return new Level3();
 	}
 
+	@Override
+	public int getRegenerationRate() {
+		return 20000;
+	}
+
 }
