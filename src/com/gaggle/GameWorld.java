@@ -59,10 +59,12 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		gameObjects.add(new Platform(world, new Rectangle(dw, -h, border, h + border), PlatformType.Wall));
 		gameObjects.add(new Platform(world, new Rectangle(-dw, 0, w + border, border), PlatformType.Floor));
 		for (int i = 0; i < 5; i++) {
-			Goose goose = new Goose(world, new Vector2f(-300 + i * 200, -100), new Chromosome());
-			geese.add(goose);
-			chromosomes.add(goose.chromosome);
-			gameObjects.add(goose);
+			for (int j = 0; j < 5; j++) {
+				Goose goose = new Goose(world, new Vector2f(-300 + i * 200, -100 - 100*j), new Chromosome(1));
+				geese.add(goose);
+				chromosomes.add(goose.chromosome);
+				gameObjects.add(goose);
+			}
 		}
 		
 		container.getInput().addMouseListener(this);

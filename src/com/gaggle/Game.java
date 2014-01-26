@@ -34,6 +34,9 @@ public class Game extends BasicGame {
 	public static void main(String[] args)
 			throws SlickException {
 		
+		CreatureMap.initRandomMap();
+		
+		
 		AppGameContainer app =
 				new AppGameContainer(new Game());
 

@@ -128,11 +128,11 @@ public class Chromosome implements Cloneable {
 		Iterator<Behavior> i2 = other.behaviorList.iterator();
 		while(i1.hasNext() || i2.hasNext()) {
 			if(i1.hasNext() && i2.hasNext()) {
-				behaviorList.add(((Behavior)selectRandom(i1.next(),i2.next())).clone());
+				baby.behaviorList.add(((Behavior)selectRandom(i1.next(),i2.next())).clone());
 			} else if(i1.hasNext()) {
-				behaviorList.add(i1.next().clone());
+				baby.behaviorList.add(i1.next().clone());
 			} else {
-				behaviorList.add(i2.next().clone());
+				baby.behaviorList.add(i2.next().clone());
 			}
 		}
 		

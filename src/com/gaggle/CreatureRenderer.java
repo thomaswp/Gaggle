@@ -40,12 +40,12 @@ public class CreatureRenderer {
 		@Override
 		protected void set(Chromosome chromosome) {
 			size = new Vector2f(chromosome.scale * Goose.MAX_SCALE * 2.5f, chromosome.scale * Goose.MAX_SCALE * 1.5f);
-			this.foot = ShapeType.Circle;
-			this.body = ShapeType.Square;
-			this.head = ShapeType.Triangle;
+			this.foot = CreatureMap.getMapping(CreatureMap.footMap, chromosome.jump, chromosome.maxSpeed, chromosome.acceleration);
+			this.body = CreatureMap.getMapping(CreatureMap.bodyMap, chromosome.scale, chromosome.density, chromosome.restitution);
+			this.head = CreatureMap.getMapping(CreatureMap.headMap, chromosome.behaviorList.get(0).action.ordinal());
 			this.headColor = Color.red;
-			this.bodyColor = Color.blue;
-			this.footColor = Color.green;
+			this.bodyColor = new Color(chromosome.density, chromosome.scale, chromosome.scale);
+			this.footColor = Color.blue;
 		}
 	};
 	
