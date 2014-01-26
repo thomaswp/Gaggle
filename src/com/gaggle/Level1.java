@@ -61,4 +61,9 @@ public class Level1 extends Level {
 		return -1;
 	}
 
+	@Override
+	public int getPointsToWin() {
+		return 20;
+	}
+	
 }

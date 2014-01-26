@@ -263,9 +263,11 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	@Override
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		origin.x -= (newx - oldx) / scale;
-		origin.y -= (newy - oldy) / scale;
-		updateBounds();
+		if (moving) {
+			origin.x -= (newx - oldx) / scale;
+			origin.y -= (newy - oldy) / scale;
+			updateBounds();
+		}
 	}
 
 	@Override
@@ -273,19 +275,31 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	}
 
+	boolean moving = false;
 	@Override
 	public void mousePressed(int button, int x, int y) {
-		Vector2f coords = mouseToWorldCoordinates(x, y);
-		for (Goose goose : geese) {
-			if (goose.isClicked(coords)) {
-				goose.toggleSelected();
+		if (button == 1) {
+			moving = true;
+		} else {
+			Vector2f coords = mouseToWorldCoordinates(x, y);
+			for (Goose goose : geese) {
+				if (goose.isClicked(coords)) {
+					goose.toggleSelected();
+					return;
+				}
+			}
+			for (Goose goose : geese) {
+				if (goose.getPosition().distance(coords) < 35) {
+					goose.toggleSelected();
+					return;
+				}
 			}
 		}
 	}
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {
-	
+		if (button == 1) moving = false;
 	}
 
 	@Override
