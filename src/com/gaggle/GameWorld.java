@@ -85,10 +85,6 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 			gameObjects.add(obj);
 		}
 		
-//		for (int i = 0; i < level.getMaxPool(); i++) {
-//			chromosomes.add(new Chromosome(level.getActionCount()));
-//		}
-		
 		regenTimer = 0;
 		
 		Debug.log(chromosomes.size());
@@ -212,11 +208,11 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		
 		g.setFont(font);
 		g.setColor(Color.black);
-		float y = spawn.getMinY() - spawn.getHeight() / 3;
+		Vector2f loc = level.getHintTextLocation();
+		float y = loc.y - hintLines.length * font.getHeight() * 0.75f;
 		for (String line : hintLines) {
-			String hintText = level.getHintText();
 			float w = font.getWidth(line);
-			g.drawString(line, 0 - w / 2, y);
+			g.drawString(line, loc.x - w / 2, y);
 			y += font.getHeight() * 1.5f;
 		}
 		

@@ -61,7 +61,7 @@ public class Level3 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level2();
+		return new Level4();
 	}
 
 	@Override
@@ -71,6 +71,11 @@ public class Level3 extends Level {
 
 	@Override
 	public String getHintText() {
-		return "When a selected creature dies, it's genetic\nmaterial is passed on to the next genereation";
+		return "Creatures also mutate,\nso new changes can emerge.";
+	}
+	
+	@Override
+	public Vector2f getHintTextLocation() {
+		return new Vector2f(-600, -600);
 	}
 }

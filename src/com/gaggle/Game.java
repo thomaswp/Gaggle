@@ -22,7 +22,7 @@ public class Game extends BasicGame {
 
 	@Override
 	public void init(GameContainer container) throws SlickException {
-		world = new GameWorld(container, new Level1());
+		world = new GameWorld(container, Level.getStartLevel());
 	}
 
 	@Override

@@ -19,6 +19,10 @@ public abstract class Level {
 	public abstract int getRegenerationRate();
 	public abstract String getHintText();
 	
+	public Vector2f getHintTextLocation() {
+		return new Vector2f(0, -300);
+	}
+	
 	protected Vector2f getRandomSpawn() {
 		Rectangle spawn = getSpawn();
 		float offX = (float) (Math.random() * spawn.getWidth());
@@ -28,6 +32,10 @@ public abstract class Level {
 	
 	public int getPointsToWin() {
 		return getMaxGeese() / 2;
+	}
+	
+	public static Level getStartLevel() {
+		return new Level1();
 	}
 
 }

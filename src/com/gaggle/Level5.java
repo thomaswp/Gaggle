@@ -73,4 +73,14 @@ public class Level5 extends Level {
 		return 20000;
 	}
 
+	@Override
+	public String getHintText() {
+		return "Good luck!";
+	}
+
+	
+	@Override
+	public Vector2f getHintTextLocation() {
+		return new Vector2f(-250, -500);
+	}
 }
