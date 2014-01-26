@@ -38,7 +38,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	
 	private int untilSpawn;
 	private Vector2f worldDimensions;
-	private Rectangle spawn, goal;
+	private Rectangle spawn, goal, goalRefill = new Rectangle(0, 0, 0, 0);
 	private String[] hintLines;
 	private int pointsRemaining;
 	private TrueTypeFont font;
@@ -223,6 +223,12 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		
 		g.setColor(new Color(0xAA6EEBA8));
 		g.fill(goal);
+		float fillHeight = (level.getRegenerationRate() > 0 && pointsRemaining < level.getPointsToWin()) ? 
+				(float)regenTimer / level.getRegenerationRate() : 0;
+		fillHeight *= goal.getHeight();
+		goalRefill.setBounds(goal.getMinX(), goal.getMaxY() - fillHeight, goal.getWidth(), fillHeight);
+		g.setColor(new Color(0x55777777));
+		g.fill(goalRefill);
 		g.setColor(new Color(0xAA000000));
 		g.draw(goal);
 		g.setFont(font);

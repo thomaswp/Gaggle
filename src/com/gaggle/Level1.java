@@ -68,7 +68,7 @@ public class Level1 extends Level {
 
 	@Override
 	public String getHintText() {
-		return "Welcome to Gaggle!\nDrag right-click to move, and zoom with the wheel.\nLeft click on a creature to select it for you genetic pool.\nTry to get creatures in the goal box.";
+		return "Welcome to Gaggle!\nDrag right-click to move, and zoom with the wheel.\nLeft click on a creature to select or unselect it for you genetic pool.\nTry to get creatures in the goal box.";
 	}
 	
 }

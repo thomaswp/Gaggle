@@ -24,7 +24,7 @@ import com.gaggle.Platform.PlatformType;
 
 public class Goose extends PhysicsObject {
 
-	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 5, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 20, MAX_SIGHT = 6;
+	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 5, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 20, MAX_SIGHT = 5;
 
 	public boolean collides;
 	
@@ -204,6 +204,7 @@ public class Goose extends PhysicsObject {
 		}
 	}
 	
+	
 	private void calculateConditions() {
 		isGrounded = isTouchingGoose = isGooseUnder = false;
 		for (GameObject obj : touchingPlatforms) {
@@ -242,23 +243,31 @@ public class Goose extends PhysicsObject {
 		}, new AABB(position, position));
 		isTouchingGoose = gooseFlag.value;
 		
-		position.x += Constant.pixelsToMeters(circleA.radius * chromosome.sight * MAX_SIGHT * dir);
-		world.queryAABB(new QueryCallback() {
-			@Override
-			public boolean reportFixture(Fixture fixture) {
-				if (fixture.getUserData() instanceof Platform) {
-					platformFlag.value = true;
-				} else if (fixture.getUserData() instanceof Box) {
-					boxFlag.value = true;
-				}
-				return platformFlag.value && boxFlag.value;
+		int widthChecks = 3, heightChecks = 3;
+		for (int i = 0; i < widthChecks; i++) {
+			for (int j = 0; j < heightChecks; j++) {
+				if (platformFlag.value && boxFlag.value) break;
+				position.x = body.getPosition().x + Constant.pixelsToMeters(circleA.radius * dir * (1 + chromosome.sight * MAX_SIGHT  * (i+1) / widthChecks));
+				position.y = body.getPosition().y - Constant.pixelsToMeters(circleA.radius * 0.5f * (j + 1) / heightChecks);
+				world.queryAABB(new QueryCallback() {
+					@Override
+					public boolean reportFixture(Fixture fixture) {
+						if (fixture.getUserData() instanceof Platform) {
+							platformFlag.value = true;
+						} else if (fixture.getUserData() instanceof Box) {
+							boxFlag.value = true;
+						}
+						return platformFlag.value && boxFlag.value;
+					}
+				}, new AABB(position, position));
 			}
-		}, new AABB(position, position));
+		}
 		isPlatformInFront = platformFlag.value;
 		isBoxInFront = boxFlag.value;
 
 		platformFlag.value = false;
-		position.y += Constant.pixelsToMeters(circleA.radius * 1.5f);
+		position.x = body.getPosition().x + Constant.pixelsToMeters(circleA.radius * chromosome.sight * MAX_SIGHT * dir);
+		position.y = body.getPosition().y + Constant.pixelsToMeters(circleA.radius * 1.5f);
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {
@@ -308,23 +317,23 @@ public class Goose extends PhysicsObject {
 	public void renderLocal(GameContainer container, Graphics g) {
 		g.scale(dir, 1);
 
-//		float alpha = isLedgeInFront ? 1 : 0.1f;
-//		
-//		g.setColor(new Color(1, 0, 0, alpha));
-//		g.fill(circleA);
-//		g.fill(circleB);
-//		g.fill(rect);
-//
-//		g.setColor(new Color(0, 1, 1, alpha));
-//		g.fill(c);
-//		g.fill(rectBase);
-//
-//		g.pushTransform();
-//		g.scale(dir, 1);
-//		g.setColor(new Color(1, 1, 1, alpha));
-//		g.fill(plowA);
-//		g.fill(plowB);
-//		g.popTransform();
+		float alpha = isPlatformInFront ? 1 : 0.1f;
+		
+		g.setColor(new Color(1, 0, 0, alpha));
+		g.fill(circleA);
+		g.fill(circleB);
+		g.fill(rect);
+
+		g.setColor(new Color(0, 1, 1, alpha));
+		g.fill(c);
+		g.fill(rectBase);
+
+		g.pushTransform();
+		g.scale(dir, 1);
+		g.setColor(new Color(1, 1, 1, alpha));
+		g.fill(plowA);
+		g.fill(plowB);
+		g.popTransform();
 
 		renderer.render(g, selected);
 
