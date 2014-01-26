@@ -23,10 +23,6 @@ public class Level1 extends Level {
 	@Override
 	public List<PhysicsObject> getObjects(World world) {
 		ArrayList<PhysicsObject> objects = new ArrayList<>();
-		
-//		objects.add(new Box(world, new Rectangle(0, -75, 150, 150), new Color(0x91794C), 100, 200));
-//		objects.add(new Box(world, new Rectangle(50, -225, 150, 150), new Color(0x91794C), 100, 200));
-		
 		return objects;
 	}
 
@@ -37,7 +33,7 @@ public class Level1 extends Level {
 
 	@Override
 	public int getMaxGeese() {
-		return 20;
+		return 10;
 	}
 
 	@Override

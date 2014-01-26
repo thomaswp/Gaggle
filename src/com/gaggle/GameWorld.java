@@ -106,7 +106,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 				removeGoose(goose);
 				i--;
 				pointsRemaining--;
-				regenTimer = level.getRegenerationRate();
+				regenTimer = 0;
 				if (checkWin()) {
 					return;
 				}
