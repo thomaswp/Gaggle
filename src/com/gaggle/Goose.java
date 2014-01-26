@@ -24,9 +24,9 @@ import com.gaggle.Platform.PlatformType;
 
 public class Goose extends PhysicsObject {
 
-	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 5, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 20;
+	public static float MAX_DENSITY = 60, MAX_SPEED = 20, MAX_ACCEL = 5, MAX_SCALE = 50, MAX_RESTITUTION = 0.3f, MAX_JUMP = 20, MAX_SIGHT = 6;
 
-	public final static boolean COLLISION = false;
+	public boolean collides;
 	
 	protected Circle circleA, circleB;
 	protected Rectangle rect, rectBase;
@@ -64,6 +64,7 @@ public class Goose extends PhysicsObject {
 		this.chromosome = chromosome;
 		this.renderer = new CreatureRenderer(chromosome);
 		this.targetSpeed = chromosome.maxSpeed * 0.75f * MAX_SPEED;
+//		this.collides = Math.random() < 0.5 ;//Math.abs(chromosome.collision - 0.5) > 0.375;
 
 		float radius = MAX_SCALE * chromosome.scale;
 		circleA = new Circle(-radius / 2, 0, radius);
@@ -93,9 +94,9 @@ public class Goose extends PhysicsObject {
 
 		Fixture weight = addFixture(createShape(new Circle(0, radius*2, radius * 0.2f)));
 		weight.getFilterData().maskBits = 0;
-		weight.setDensity(10 * (COLLISION ? 1000 : 1));
+		weight.setDensity(10 * (collides ? 1000 : 1));
 
-		if (COLLISION) {
+		if (collides) {
 		Fixture[] plowFixes = new Fixture[] {
 				addFixture(createShape(plowA)),
 				addFixture(createShape(plowB)),
@@ -103,8 +104,8 @@ public class Goose extends PhysicsObject {
 		for (Fixture plowFix : plowFixes) {
 			plowFix.setRestitution(0);
 			plowFix.setFriction(1);
-			plowFix.getFilterData().categoryBits = Constant.GOOSE_BIT | Constant.PLOW_BIT;
-			plowFix.getFilterData().maskBits =  Constant.GOOSE_BIT | Constant.PLOW_BIT;
+			plowFix.getFilterData().categoryBits = Constant.GOOSE_COLLIDING_BIT | Constant.PLOW_BIT;
+			plowFix.getFilterData().maskBits =  Constant.GOOSE_COLLIDING_BIT | Constant.PLOW_BIT;
 		}
 		}
 
@@ -117,7 +118,12 @@ public class Goose extends PhysicsObject {
 		f.setRestitution(chromosome.restitution * MAX_RESTITUTION);
 		f.setUserData(this);
 		f.getFilterData().categoryBits = Constant.GOOSE_BIT;
-		if (!COLLISION) f.getFilterData().maskBits ^= Constant.GOOSE_BIT;
+		if (collides) {
+			f.getFilterData().categoryBits |= Constant.GOOSE_COLLIDING_BIT;
+		} else {
+			f.getFilterData().maskBits ^= Constant.PLOW_BIT;
+			f.getFilterData().maskBits ^= Constant.GOOSE_BIT;
+		}
 		return f;
 	}
 
@@ -204,7 +210,7 @@ public class Goose extends PhysicsObject {
 			if (obj instanceof Platform && ((Platform) obj).type == PlatformType.Floor) {
 				isGrounded = true;
 				break;
-			} else if (obj instanceof Goose) {
+			} else if (obj instanceof Goose && obj != this) {
 				isTouchingGoose = true;
 				Vec2 otherPos = ((Goose) obj).body.getPosition(); 
 				Vec2 pos = body.getPosition();
@@ -236,7 +242,7 @@ public class Goose extends PhysicsObject {
 		}, new AABB(position, position));
 		isTouchingGoose = gooseFlag.value;
 		
-		position.x += Constant.pixelsToMeters(circleA.radius * 3f * dir);
+		position.x += Constant.pixelsToMeters(circleA.radius * chromosome.sight * MAX_SIGHT * dir);
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {

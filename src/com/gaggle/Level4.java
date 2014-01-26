@@ -69,4 +69,9 @@ public class Level4 extends Level {
 	public int getRegenerationRate() {
 		return 20000;
 	}
+
+	@Override
+	public String getHintText() {
+		return "Creatures also mutate,\nso new changes can emerge.";
+	}
 }

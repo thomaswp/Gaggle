@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class Chromosome implements Cloneable {
-	public float density = 0.5f, scale = 0.5f, maxSpeed = 0.5f, acceleration = 0.5f, restitution = 0.5f, jump = 0.5f;
+	public float density = 0.5f, scale = 0.5f, maxSpeed = 0.5f, acceleration = 0.5f, restitution = 0.5f, jump = 0.5f, sight = 0.5f, collision = 0.5f;
 	public ArrayList<Behavior> behaviorList;
 	
 	static Random rand = new Random();
@@ -17,6 +17,8 @@ public class Chromosome implements Cloneable {
 		acceleration = getPseudorandom();
 		restitution = getPseudorandom();
 		jump = getPseudorandom();
+		sight = getPseudorandom();
+		collision = getPseudorandom();
 		
 		behaviorList = new ArrayList<Behavior>(actionCount);
 		for(int i = 0; i < actionCount; i++) {
@@ -45,6 +47,8 @@ public class Chromosome implements Cloneable {
 		c.acceleration = acceleration;
 		c.restitution = restitution;
 		c.jump = jump;
+		c.sight = sight;
+		c.collision = collision;
 		
 		for(Behavior b : behaviorList) {
 			c.behaviorList.add(b.clone());
@@ -70,7 +74,7 @@ public class Chromosome implements Cloneable {
 			double a = rand.nextDouble();
 			if(a < PRB_TRAIT_MUT) {
 				//mutate a trait
-				int b = rand.nextInt(6);
+				int b = rand.nextInt(8);
 				
 				float w1 = .6f;
 				float w2 = .4f;
@@ -94,7 +98,11 @@ public class Chromosome implements Cloneable {
 					break;
 				case 5:
 					jump = jump*w1 + c;
-				}
+				case 6:
+					sight = sight*w1 + c;
+				case 7:
+					collision = collision*w1 + c;
+				} 
 			} else {
 				//mutate a behavior
 				if(behaviorList.size() > 0) {
@@ -123,6 +131,8 @@ public class Chromosome implements Cloneable {
 		baby.maxSpeed = (float) selectRandom(maxSpeed, other.maxSpeed);
 		baby.restitution = (float) selectRandom(restitution, other.restitution);
 		baby.jump = (float) selectRandom(jump, other.jump);
+		baby.sight = (float) selectRandom(sight, other.sight);
+		baby.collision = (float) selectRandom(collision, other.collision);
 		
 		Iterator<Behavior> i1 = behaviorList.iterator();
 		Iterator<Behavior> i2 = other.behaviorList.iterator();

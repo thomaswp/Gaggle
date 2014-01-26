@@ -27,7 +27,7 @@ public class Level3 extends Level {
 		ArrayList<PhysicsObject> objects = new ArrayList<>();
 		
 		Color borderColor = new Color(0x4D5FB3);
-		objects.add(new Platform(world, new Rectangle(0, -1200, 50, 1180), PlatformType.Ceiling, borderColor));	
+		objects.add(new Platform(world, new Rectangle(0, -1200, 50, 1180), PlatformType.Floor, borderColor));	
 //		objects.add(new Box(world, new Rectangle(0, -75, 150, 150), new Color(0x91794C), 100, 200));
 //		objects.add(new Box(world, new Rectangle(50, -225, 150, 150), new Color(0x91794C), 100, 200));
 		
@@ -61,11 +61,16 @@ public class Level3 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level4();
+		return new Level2();
 	}
 
 	@Override
 	public int getRegenerationRate() {
 		return 25000;
+	}
+
+	@Override
+	public String getHintText() {
+		return "When a selected creature dies, it's genetic\nmaterial is passed on to the next genereation";
 	}
 }

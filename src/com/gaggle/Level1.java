@@ -53,7 +53,7 @@ public class Level1 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level2();
+		return new Level3();
 	}
 
 	@Override
@@ -64,6 +64,11 @@ public class Level1 extends Level {
 	@Override
 	public int getPointsToWin() {
 		return 20;
+	}
+
+	@Override
+	public String getHintText() {
+		return "Drag right-click to move, and zoom with the wheel.\nLeft click on a creature to select it for you genetic pool.\nTry to get creatures in the goal box.";
 	}
 	
 }

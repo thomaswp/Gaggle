@@ -39,6 +39,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 	private int untilSpawn;
 	private Vector2f worldDimensions;
 	private Rectangle spawn, goal;
+	private String[] hintLines;
 	private int pointsRemaining;
 	private TrueTypeFont font;
 	private int regenTimer;
@@ -49,6 +50,8 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		resolution = new Vector2f(container.getWidth(), container.getHeight());
 		container.getInput().addMouseListener(this);
 		loadLevel(level);
+		origin.set(0, -300);
+		scale = targetScale = 0.7f;
 	}
 
 	private void loadLevel(Level level) {
@@ -59,6 +62,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		spawn = level.getSpawn();
 		goal = level.getGoal();
 		pointsRemaining = level.getPointsToWin();
+		hintLines = level.getHintText().split("\n");
 		
 		font = new TrueTypeFont(new Font("Arial", Font.BOLD, 50), true);
 				
@@ -205,6 +209,16 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		g.translate(container.getWidth() / 2, container.getHeight() / 2);
 		g.scale(scale, scale);
 		g.translate(-origin.x, -origin.y);
+		
+		g.setFont(font);
+		g.setColor(Color.black);
+		float y = spawn.getMinY() - spawn.getHeight() / 3;
+		for (String line : hintLines) {
+			String hintText = level.getHintText();
+			float w = font.getWidth(line);
+			g.drawString(line, 0 - w / 2, y);
+			y += font.getHeight() * 1.5f;
+		}
 		
 		g.setColor(new Color(0xAA9DA6D1));
 		g.fill(spawn);

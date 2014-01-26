@@ -57,12 +57,17 @@ public class Level2 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level3();
+		return new Level4();
 	}
 
 	@Override
 	public int getRegenerationRate() {
 		return 20000;
+	}
+
+	@Override
+	public String getHintText() {
+		return "Sometimes bigger is better;\nsometimes light and small.";
 	}
 
 }

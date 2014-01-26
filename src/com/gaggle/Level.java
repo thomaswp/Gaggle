@@ -17,6 +17,7 @@ public abstract class Level {
 	public abstract int getActionCount();
 	public abstract Level nextLevel();
 	public abstract int getRegenerationRate();
+	public abstract String getHintText();
 	
 	protected Vector2f getRandomSpawn() {
 		Rectangle spawn = getSpawn();
