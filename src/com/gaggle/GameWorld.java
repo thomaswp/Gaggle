@@ -14,6 +14,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.geom.Rectangle;
@@ -22,7 +23,7 @@ import org.newdawn.slick.geom.Vector2f;
 import com.gaggle.Platform.PlatformType;
 
 
-public class GameWorld implements GameObject, MouseListener, ContactListener {
+public class GameWorld implements GameObject, MouseListener, ContactListener, KeyListener {
 	
 	private World world;
 	private List<GameObject> gameObjects = new ArrayList<>();
@@ -49,6 +50,7 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 		world.setContactListener(this);
 		resolution = new Vector2f(container.getWidth(), container.getHeight());
 		container.getInput().addMouseListener(this);
+		container.getInput().addKeyListener(this);
 		loadLevel(level);
 		origin.set(0, -300);
 		scale = targetScale = 0.7f;
@@ -182,6 +184,15 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 			return true;
 		}
 		return false;
+	}
+	
+	private void resetPopulation() {
+		for (Goose goose : geese) {
+			gameObjects.remove(goose);
+			goose.dispose();
+		}
+		geese.clear();
+		chromosomes.clear();
 	}
 
 	private void removeGoose(Goose goose) {
@@ -371,6 +382,18 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	@Override
 	public void dispose(World world) {
+		
+	}
+
+	@Override
+	public void keyPressed(int key, char c) {
+		if (key == Input.KEY_R) {
+			resetPopulation();
+		}
+	}
+
+	@Override
+	public void keyReleased(int key, char c) {
 		
 	}
 	

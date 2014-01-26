@@ -67,7 +67,7 @@ public class Level4 extends Level {
 
 	@Override
 	public String getHintText() {
-		return "Sometimes bigger is better,\nsometimes light and small.";
+		return "Sometimes bigger is better,\nsometimes light and small.\n If it gets hard, press 'R'\nto reset your population.";
 	}
 	
 	@Override

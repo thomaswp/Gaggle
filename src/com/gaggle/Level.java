@@ -35,7 +35,7 @@ public abstract class Level {
 	}
 	
 	public static Level getStartLevel() {
-		return new Level1();
+		return new Level4();
 	}
 
 }
