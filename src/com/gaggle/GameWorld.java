@@ -156,7 +156,12 @@ public class GameWorld implements GameObject, MouseListener, ContactListener, Ke
 			c = c1.breed(c2);
 		} else {
 			if(chromosomes.size() > 0) {
-				c = chromosomes.get((int)(chromosomes.size() * Math.random())).clone();
+				double prbOld = chromosomes.size()/(double) level.getMaxPool();
+				if(Math.random() < prbOld) {
+					c = chromosomes.get((int)(chromosomes.size() * Math.random())).clone();
+				} else {
+					c = new Chromosome(level.getActionCount());
+				}
 			} else {
 				c = new Chromosome(level.getActionCount());
 			}

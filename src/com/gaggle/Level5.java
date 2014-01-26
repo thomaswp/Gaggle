@@ -65,7 +65,7 @@ public class Level5 extends Level {
 
 	@Override
 	public Level nextLevel() {
-		return new Level1();
+		return new LevelComplete();
 	}
 
 	@Override
