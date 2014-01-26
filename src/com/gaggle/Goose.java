@@ -163,8 +163,7 @@ public class Goose extends PhysicsObject {
 		
 		if (isPlatformInFront && behavior.condition != Condition.PlatformInFront) {
 			turnAround();
-		}
-		if (isBoxInFront && behavior.condition != Condition.BoxInFront) {
+		} else if (isBoxInFront && behavior.condition != Condition.BoxInFront) {
 			turnAround();
 		}
 
@@ -234,7 +233,7 @@ public class Goose extends PhysicsObject {
 		}, new AABB(position, position));
 		isTouchingGoose = gooseFlag.value;
 		
-		position.x += Constant.pixelsToMeters(circleA.radius * 2f * dir);
+		position.x += Constant.pixelsToMeters(circleA.radius * 3f * dir);
 		world.queryAABB(new QueryCallback() {
 			@Override
 			public boolean reportFixture(Fixture fixture) {

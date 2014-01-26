@@ -144,8 +144,8 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	private boolean checkWin() {
 		if (pointsRemaining == 0) {
-			for (Goose goose : geese) {
-				goose.dispose();
+			for (GameObject object : gameObjects) {
+				object.dispose(world);
 			}
 			gameObjects.clear();
 			geese.clear();
@@ -315,5 +315,10 @@ public class GameWorld implements GameObject, MouseListener, ContactListener {
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) { }
+
+	@Override
+	public void dispose(World world) {
+		
+	}
 	
 }

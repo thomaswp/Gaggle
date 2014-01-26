@@ -4,6 +4,7 @@ import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.World;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
@@ -32,6 +33,11 @@ public abstract class PhysicsObject implements GameObject {
 		g.rotate(0, 0, Constant.radiansToDegrees(body.getAngle()));
 		renderLocal(container, g);
 		g.popTransform();
+	}
+	
+	@Override
+	public void dispose(World world) {
+		world.destroyBody(body);
 	}
 	
 	protected PolygonShape createShape(Polygon poly) {
